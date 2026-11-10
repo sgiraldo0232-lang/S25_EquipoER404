@@ -53,7 +53,8 @@ def descargar(simbolos, ini, fin):
     faltan = [t for t in simbolos if t not in cierre.columns or cierre[t].dropna().empty]
     if faltan:
         raise ValueError("Sin datos para: " + ", ".join(faltan))
-    return cierre.reindex(columns=list(simbolos))
+    # yfinance nombra el índice ("Date") y las columnas ("Ticker"); se limpian para que los gráficos no dependan de esos nombres.
+    return cierre.reindex(columns=list(simbolos)).rename_axis(index=None, columns=None)
 
 
 if not tickers:
@@ -130,7 +131,7 @@ with t2:
 
 with t3:
     st.subheader("Riesgo contra rendimiento")
-    dfp = res.reset_index().rename(columns={"index": "Activo"})
+    dfp = res.rename_axis("Activo").reset_index()
     fig = px.scatter(dfp, x="Volatilidad anualizada", y="Rendimiento anualizado", text="Activo", color="Activo")
     fig.update_traces(marker_size=14, textposition="top center")
     fig.update_xaxes(tickformat=".0%")
